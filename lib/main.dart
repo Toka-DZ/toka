@@ -1638,7 +1638,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
   }
 
   void _stopAdhan() {
-    _audioEl?.pause();
+   await _audioPlayer.stop();
     _audioEl = null;
     setState(() => _adhanPlaying = false);
   }
