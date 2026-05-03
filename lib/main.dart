@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:html' as html; // ignore: avoid_web_libraries_in_flutter
+import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
@@ -1498,7 +1498,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
   bool _loading = true;
   bool _adhanPlaying = false;
   String _adhanType = 'makki';
-  html.AudioElement? _audioEl;
+  AudioPlayer _audioPlayer = AudioPlayer();
   final _keys = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
   final _icons = ['🌙', '🌄', '☀️', '⛅', '🌇', '🌃'];
   final _nameKeys = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -1630,7 +1630,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
     final url = _adhanType == 'makki'
         ? 'https://www.islamcan.com/audio/adhan/azan1.mp3'
         : 'https://www.islamcan.com/audio/adhan/azan2.mp3';
-    _audioEl = html.AudioElement(url)..play();
+    await _audioPlayer.play(UrlSource(url));
     setState(() => _adhanPlaying = true);
     _audioEl!.onEnded.listen((_) {
       if (mounted) setState(() => _adhanPlaying = false);
