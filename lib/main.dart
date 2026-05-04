@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:html' as html; // ignore: avoid_web_libraries_in_flutter
 import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
@@ -1498,7 +1498,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
   bool _loading = true;
   bool _adhanPlaying = false;
   String _adhanType = 'makki';
-  AudioPlayer _audioPlayer = AudioPlayer();
+  html.AudioElement? _audioEl;
   final _keys = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
   final _icons = ['🌙', '🌄', '☀️', '⛅', '🌇', '🌃'];
   final _nameKeys = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -1625,20 +1625,20 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
     return 0;
   }
 
-  void _playAdhan() {
+  void _playAdhan() async {
     _audioEl?.pause();
     final url = _adhanType == 'makki'
         ? 'https://www.islamcan.com/audio/adhan/azan1.mp3'
         : 'https://www.islamcan.com/audio/adhan/azan2.mp3';
-    await _audioPlayer.play(UrlSource(url));
+    _audioEl = html.AudioElement(url)..play();
     setState(() => _adhanPlaying = true);
     _audioEl!.onEnded.listen((_) {
       if (mounted) setState(() => _adhanPlaying = false);
     });
   }
 
-  void _stopAdhan() {
-   await _audioPlayer.stop();
+  void _stopAdhan() async {
+    _audioEl?.pause();
     _audioEl = null;
     setState(() => _adhanPlaying = false);
   }
@@ -2077,7 +2077,7 @@ class HijriCalendarPage extends StatefulWidget {
 
 class _HijriCalendarPageState extends State<HijriCalendarPage> {
   // Default: 15 Dhu Al-Qi'dah 1447 — الأحد (month index 10 = 0-based)
-  int _year = 1447, _month = 10, _day = 15;
+  int _year = 1447, _month = 10, _day = 16;
   bool _loading = true;
   final _months = [
     'محرم',
@@ -2219,7 +2219,7 @@ class _HijriCalendarPageState extends State<HijriCalendarPage> {
     setState(() {
       _year = 1447;
       _month = 10;
-      _day = 15;
+      _day = 16;
       _loading = false;
     });
   }
@@ -2301,8 +2301,10 @@ class _HijriCalendarPageState extends State<HijriCalendarPage> {
   Widget _buildGrid() {
     final l = AppState().lang;
     final days = l == 'ar'
-        ? ['أح', 'إث', 'ثل', 'أر', 'خم', 'جم', 'سب']
-        : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        ? ['أر', 'خم', 'جم', 'سب', 'أح', 'إث']
+        : l == 'fr'
+            ? ['Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di', 'Lu']
+            : ['Tu', 'We', 'Th', 'Fr', 'Sa', 'Su', 'Mo'];
     final ed = _events
         .where((e) => e['m'] == _month)
         .map((e) => e['d'] as int)
